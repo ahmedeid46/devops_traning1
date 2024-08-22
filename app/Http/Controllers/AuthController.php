@@ -7,22 +7,49 @@ use App\Http\Requests\RegisterUser;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    function login(LoginUserRequest $request) {
-        $user = User::where('email',$request->email)->first();
-        if(!$user || !Hash::check($request->password,$user->password)){
+
+    /**
+     * Get a JWT via given credentials.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function login()
+    {
+        $credentials = request(['email', 'password']);
+
+        if (! $token = auth()->attempt($credentials)) {
             return response()->json([
                 'status' => false,
-                'message' => 'Invalid Credentials'
-            ],401);
+                'message' => 'Unauthorized'
+            ], 401);
         }
-        $token = $user->createToken($user->name.'-AuthToken')->plainTextToken;
+
+        return $this->respondWithToken($token);
+    }
+    function me(){
         return response()->json([
-            'status' => true,
+            'status'=>true,
+            'data'=>auth()->user()
+        ]);
+    }
+    /**
+     * Get the token array structure.
+     *
+     * @param  string $token
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function respondWithToken($token)
+    {
+        return response()->json([
             'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60
         ]);
     }
     function register(RegisterUser $request)

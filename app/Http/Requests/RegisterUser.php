@@ -25,7 +25,7 @@ class RegisterUser extends FormRequest
             'name'=>'required|string',
             'email'=>'required|string|email|unique:users',
             'password'=>'required|min:8',
-            'photo'=>'required|image|mimes:jpeg,png,jpg,gif|size:2048'
+            'photo'=>'required|image|mimes:jpeg,png,jpg,gif|max:2048'
         ];
     }
 

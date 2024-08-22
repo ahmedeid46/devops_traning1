@@ -15,5 +15,11 @@ class Category extends Model implements TranslatableContract
     public $translatedAttributes = ['title','description'];
     public $fillable = ['photo'];
 
+    public function getPhotoAttribute(){
+
+        return asset('storage/'.$this->attributes['photo']);
+    }
+
+
 
 }
