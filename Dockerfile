@@ -27,6 +27,13 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Install Laravel dependencies
 RUN composer install
 
+# Set permissions
+RUN chown -R www-data:www-data /var/www
+RUN chmod -R 775 /var/www
+RUN chmod -R 777 /var/www/storage
+RUN chmod -R 777 /var/www/public
+RUN chmod -R 777 /var/www/bootstrap
+
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000
 
