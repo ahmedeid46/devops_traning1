@@ -1,5 +1,5 @@
 # Use the official PHP image with FPM
-FROM php:8.2-fpm
+FROM php:8.2-fpm AS base
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -25,14 +25,29 @@ COPY . /var/www
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install Laravel dependencies
-RUN composer install
+RUN composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www
-RUN chmod -R 775 /var/www
-RUN chmod -R 777 /var/www/storage
-RUN chmod -R 777 /var/www/public
-RUN chmod -R 777 /var/www/bootstrap
+RUN chmod -R 755 /var/www
+RUN chmod -R 775 /var/www/storage
+RUN chmod -R 775 /var/www/public
+RUN chmod -R 775 /var/www/bootstrap
+
+# Expose port 9000 for PHP-FPM
+EXPOSE 9000
+
+# Start PHP-FPM server
+CMD ["php-fpm"]
+
+# Optional: Use multi-stage build to reduce final image size
+FROM base AS final
+
+# Copy application files from the build stage
+COPY --from=base /var/www /var/www
+
+# Set permissions again (for the final stage)
+RUN chown -R www-data:www-data /var/www
 
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000
